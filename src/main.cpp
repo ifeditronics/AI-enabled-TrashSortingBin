@@ -1,107 +1,29 @@
 #include <Arduino.h>
 
-#include "Classifier.h"
-#include "ServoControl.h"
-#include "BinSensor.h"
-
-Classifier classifier;
-ServoControl servo;
-BinSensor bin;
-
-/************************************************
- * Hardware Pin Definitions
- ***********************************************/
-
-#define TRIG_PIN    13
-#define ECHO_PIN    15
-
-#define SERVO_PIN   14
-
-#define GREEN_LED   2
-#define RED_LED     12
-
-/************************************************/
+#define FLASH_LED 4
 
 void setup()
 {
     Serial.begin(115200);
+    delay(2000);
 
     Serial.println();
-    Serial.println("==============================");
-    Serial.println(" SMART AI TRASH BIN");
-    Serial.println("==============================");
+    Serial.println("================================");
+    Serial.println("ESP32-CAM BLINK TEST");
+    Serial.println("================================");
 
-    if (!classifier.begin())
-    {
-        Serial.println("Classifier initialization failed!");
+    pinMode(FLASH_LED, OUTPUT);
 
-        while (true)
-        {
-            delay(1000);
-        }
-    }
-
-    servo.begin(
-        SERVO_PIN,
-        GREEN_LED,
-        RED_LED);
-
-    bin.begin(
-        TRIG_PIN,
-        ECHO_PIN);
-
-    servo.home();
-
-    Serial.println("System Ready.");
+    digitalWrite(FLASH_LED, LOW);
 }
 
 void loop()
 {
-    WasteType waste = classifier.classify();
+    Serial.println("LED ON");
+    digitalWrite(FLASH_LED, HIGH);
+    delay(1000);
 
-    switch (waste)
-    {
-        case RECYCLABLE:
-
-            Serial.println("Recyclable");
-
-            servo.recyclable();
-
-            delay(1500);
-
-            servo.home();
-
-            break;
-
-        case NON_RECYCLABLE:
-
-            Serial.println("Non Recyclable");
-
-            servo.nonRecyclable();
-
-            delay(1500);
-
-            // Only check bin fullness
-            // when pointing to the non-recyclable side
-            if (bin.isFull())
-            {
-                Serial.println("WARNING: BIN FULL!");
-
-                servo.warning();
-            }
-
-            servo.home();
-
-            break;
-
-        default:
-
-            Serial.println("Unknown");
-
-            servo.home();
-
-            break;
-    }
-
-    delay(500);
+    Serial.println("LED OFF");
+    digitalWrite(FLASH_LED, LOW);
+    delay(1000);
 }
